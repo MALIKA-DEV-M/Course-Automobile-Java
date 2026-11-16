@@ -1,0 +1,90 @@
+@startuml diagramme_sequence_course
+skinparam monochrome false
+skinparam shadowing false
+skinparam sequence {
+    ArrowColor #1e3a8a
+    ActorBorderColor #1e3a8a
+    ActorBackgroundColor #eff6ff
+    ParticipantBorderColor #1e3a8a
+    ParticipantBackgroundColor #eff6ff
+    LifeLineBorderColor #1e3a8a
+    BoxBorderColor #1e3a8a
+}
+
+actor Utilisateur
+participant ":Main" as Main
+participant ":GestionCourse" as Gestion
+participant ":SimulateurSequentiel" as Sim
+participant "c:Course" as Course
+participant "p:Participation" as Part
+
+Utilisateur -> Main : 7. Démarrer une course
+activate Main
+
+Main -> Gestion : getCourseActuelle()
+activate Gestion
+Gestion --> Main : c
+deactivate Gestion
+
+alt Aucune course configurée (c == null)
+    Main --> Utilisateur : Afficher erreur ("Aucune course configurée")
+else Course existante
+    Main -> Sim : lancerSimulation(c)
+    activate Sim
+    
+    Sim -> Course : verifierConfiguration()
+    activate Course
+    
+    alt Configuration invalide (< 2 participants ou déjà lancée)
+        Course --> Sim : throw IllegalStateException
+        deactivate Course
+        Sim --> Main : propager exception
+        Main --> Utilisateur : Afficher message d'erreur
+    else Configuration valide
+        Course --> Sim : OK
+        activate Course
+        Sim -> Course : setEstDemarree(true)
+        
+        loop Tant que toutes les voitures ne sont pas arrivées
+            loop Pour chaque participation p de c
+                Sim -> Part : avancer(distanceTotale)
+                activate Part
+                note right of Part
+                    distance += vitesse
+                    plafonnement si >= distanceTotale
+                    estArrivee = true
+                end note
+                Part --> Sim : état progression
+                deactivate Part
+            end
+            Sim --> Utilisateur : Afficher progression du tour
+        end
+        
+        Sim -> Course : calculerClassementSequentiel()
+        Course --> Sim : classement trié
+        Sim -> Course : setEstTerminee(true)
+        deactivate Course
+        
+        Sim --> Main : simulation terminée
+        deactivate Sim
+        
+        Main -> Gestion : archiverCourseTerminee()
+        activate Gestion
+        deactivate Gestion
+        Main --> Utilisateur : Afficher "Course terminée !"
+    end
+end
+
+Utilisateur -> Main : 8. Consulter les résultats
+Main -> Gestion : getDerniersResultatsDisponibles()
+activate Gestion
+Gestion --> Main : c
+deactivate Gestion
+Main -> Course : getClassement()
+activate Course
+Course --> Main : liste ordonnée des participations
+deactivate Course
+Main --> Utilisateur : Afficher gagnant, tours et classement final
+
+deactivate Main
+@enduml

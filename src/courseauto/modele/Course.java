@@ -56,6 +56,7 @@ public class Course {
             }
         }
         return false;
+    }
 
         public void verifierConfiguration() {
             if (estDemarree || estTerminee) {
@@ -65,7 +66,7 @@ public class Course {
                 throw new IllegalStateException("Impossible de démarrer la course : au moins 2 voitures doivent participer (actuellement : " + participants.size() + ").");
             }
         }
-    }
+    
     public void calculerClassementSequentiel() {
         classement.clear();
         classement.addAll(participants);

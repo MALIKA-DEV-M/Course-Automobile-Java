@@ -1,0 +1,82 @@
+@startuml diagramme_classes
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    BorderColor #1e3a8a
+    HeaderBackgroundColor #eff6ff
+    ArrowColor #1e3a8a
+}
+class Voiture {
+- id : String 
+- nom : String
+- marque : String
+- vitesse : double
++ Voiture(id : String, nom : String, marque : String, vitesse : double)
+    + getId() : String
+    + getNom() : String
+    + getMarque() : String
+    + getVitesse() : double
+    + setNom(nom : String) : void
+    + setMarque(marque : String) : void
+    + setVitesse(vitesse : double) : void
+    + toString() : String
+}
+class Participation {
+    - distanceParcourue : double
+    - toursEffectues : int
+    - arrivee : boolean
+    + Participation(voiture : Voiture)
+    + avancer(distanceTotale : double) : void
+    + calculerTempsTheorique(distanceTotale : double) : double
+    + getVoiture() : Voiture
+    + getDistanceParcourue() : double
+    + getToursEffectues() : int
+    + isArrivee() : boolean
+}
+
+class Course {
+    - id : String
+    - nom : String
+    - distanceTotale : double
+    - enCours : boolean
+    - terminee : boolean
+    - toursTotaux : int
+    - classement : List
+    + Course(id : String, nom : String, distanceTotale : double)
+    + ajouterParticipant(v : Voiture) : void
+    + contientVoiture(idVoiture : String) : boolean
+    + estValidePourDemarrer() : boolean
+    + demarrerSimulation() : void
+    + genererClassement() : void
+    + getId() : String
+    + getNom() : String
+    + getDistanceTotale() : double
+    + isEnCours() : boolean
+    + isTerminee() : boolean
+    + getParticipants() : List
+    + getClassement() : List
+}
+
+class GestionCourse {
+    - derniereCourseTerminee : Course
+    + GestionCourse()
+    + ajouterVoiture(v : Voiture) : void
+    + rechercherVoiture(id : String) : Voiture
+    + modifierVoiture(id : String, nom : String, marque : String, vitesse : double) : void
+    + supprimerVoiture(id : String) : void
+    + listerVoitures() : List
+    + creerNouvelleCourse(id : String, nom : String, distance : double) : Course
+    + inscrireVoitureACourse(idVoiture : String) : void
+    + lancerCourse() : void
+    + getCourseActuelle() : Course
+    + getDerniereCourseTerminee() : Course
+}
+
+' Relations et Multiplicités
+Course "1" *-- "0..*" Participation : contient >
+Participation "0..*" --> "1" Voiture : concerne >
+GestionCourse "1" o-- "0..*" Voiture : gère >
+GestionCourse "1" o-- "0..2" Course : supervise >
+@enduml

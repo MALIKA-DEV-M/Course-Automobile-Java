@@ -1,0 +1,98 @@
+@startuml diagramme_classes
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    BorderColor #1e3a8a
+    HeaderBackgroundColor #eff6ff
+    ArrowColor #1e3a8a
+}
+
+class Voiture {
+    - id : String
+    - nom : String
+    - marque : String
+    - vitesse : double
+    + Voiture(id : String, nom : String, marque : String, vitesse : double)
+    + getId() : String
+    + getNom() : String
+    + getMarque() : String
+    + getVitesse() : double
+    + setNom(nom : String) : void
+    + setMarque(marque : String) : void
+    + setVitesse(vitesse : double) : void
+    + equals(o : Object) : boolean
+    + hashCode() : int
+    + toString() : String
+}
+
+class Participation {
+    - distanceParcourue : double
+    - nbTours : int
+    - estArrivee : boolean
+    + Participation(voiture : Voiture)
+    + avancer(distanceTotale : double) : void
+    + getTempsTheorique(distanceTotale : double) : double
+    + getVoiture() : Voiture
+    + getDistanceParcourue() : double
+    + getNbTours() : int
+    + isEstArrivee() : boolean
+    + toString() : String
+}
+
+class Course {
+    - id : String
+    - nom : String
+    - distanceTotale : double
+    - estDemarree : boolean
+    - estTerminee : boolean
+    - classement : List<Participation>
+    + Course(id : String, nom : String, distanceTotale : double)
+    + ajouterParticipant(voiture : Voiture) : void
+    + contientVoiture(idVoiture : String) : boolean
+    + verifierConfiguration() : void
+    + calculerClassementSequentiel() : void
+    + getDetailsConfiguration() : String
+    + getId() : String
+    + getNom() : String
+    + getDistanceTotale() : double
+    + getParticipants() : List<Participation>
+    + getClassement() : List<Participation>
+    + isEstDemarree() : boolean
+    + setEstDemarree(estDemarree : boolean) : void
+    + isEstTerminee() : boolean
+    + setEstTerminee(estTerminee : boolean) : void
+}
+
+class GestionCourse {
+    - voitures : Map<String, Voiture>
+    - courseActuelle : Course
+    - derniereCourseTerminee : Course
+    + GestionCourse()
+    + ajouterVoiture(voiture : Voiture) : void
+    + rechercherVoiture(id : String) : Voiture
+    + listerVoitures() : List<Voiture>
+    + estVoitureVerrouillee(idVoiture : String) : boolean
+    + modifierVoiture(id : String, nouveauNom : String, nouvelleMarque : String, nouvelleVitesse : double) : void
+    + supprimerVoiture(id : String) : void
+    + creerCourse(id : String, nom : String, distanceTotale : double) : Course
+    + inscrireVoitureACourse(idVoiture : String) : void
+    + archiverCourseTerminee() : void
+    + getCourseActuelle() : Course
+    + getDerniersResultatsDisponibles() : Course
+}
+
+class SimulateurSequentiel {
+    + lancerSimulation(course : Course) : void
+    + afficherClassement(course : Course) : void
+}
+
+' Relations et Multiplicités
+Course "1" *-- "0..*" Participation : contient >
+Participation "0..*" --> "1" Voiture : concerne >
+GestionCourse "1" o-- "0..*" Voiture : gère >
+GestionCourse "1" o-- "0..2" Course : supervise >
+SimulateurSequentiel ..> Course : simule >
+SimulateurSequentiel ..> Participation : fait progresser >
+@enduml

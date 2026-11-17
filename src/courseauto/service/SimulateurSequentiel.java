@@ -1,95 +1,123 @@
-import java.util.Scanner;
+package courseauto.service;
 
+import courseauto.modele.Course;
+import courseauto.modele.Participation;
+
+import java.util.List;
+
+/**
+ * Moteur de simulation séquentielle d'une course automobile (Fonctionnalités F3 et F4).
+ * Fait progresser les voitures tour par tour jusqu'à l'arrivée de tous les participants,
+ * puis affiche le classement final départagé selon les règles du cahier des charges.
+ */
 public class SimulateurSequentiel {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        GestionCourse gestionCourse = new GestionCourse();
-        int choix = -1;
 
-        do {
-            System.out.println("==================================================");
-            System.out.println("          GESTION DE COURSES AUTOMOBILES          ");
-            System.out.println("==================================================");
-            System.out.println("1. Ajouter une voiture");
-            System.out.println("2. Afficher les voitures");
-            System.out.println("3. Rechercher une voiture");
-            System.out.println("4. Modifier une voiture");
-            System.out.println("5. Supprimer une voiture");
-            System.out.println("6. Créer et configurer une course");
-            System.out.println("7. Démarrer une course");
-            System.out.println("8. Consulter les résultats");
-            System.out.println("0. Quitter");
-            System.out.println("==================================================");
-            System.out.print("Votre choix : ");
+    /**
+     * Lance et exécute la simulation complète d'une course configurée.
+     *
+     * @param course La course à simuler (doit contenir au moins 2 voitures)
+     * @throws IllegalArgumentException si la course est nulle
+     * @throws IllegalStateException    si la course n'est pas valide pour démarrer
+     */
+    public void lancerSimulation(Course course) {
+        if (course == null) {
+            throw new IllegalArgumentException("Aucune course à simuler.");
+        }
 
-            if (scanner.hasNextInt()) {
-                choix = scanner.nextInt();
-                scanner.nextLine(); // Consommer la fin de ligne
+        // Vérification des préconditions (au moins 2 voitures inscrites, non démarrée)
+        course.verifierConfiguration();
+        course.setEstDemarree(true);
 
-                switch (choix) {
-                    case 1:
-                        System.out.print("Entrez l'immatriculation de la voiture : ");
-                        String immat = scanner.nextLine();
-                        System.out.print("Entrez le modèle de la voiture : ");
-                        String modele = scanner.nextLine();
-                        System.out.println("-> Option 1 sélectionnée.");
-                        gestionCourse.ajouterVoiture(immat, modele);
-                        System.out.println("-> Succès : La voiture a bien été ajoutée !");
-                        break;
-                    case 2:
-                        System.out.println("\n--- LISTE DES VOITURES ---");
-                        gestionCourse.afficherVoitures();
-                       break;
-                    case 3:
-                        System.out.print("Entrez l'immatriculation de la voiture à rechercher : ");
-                        String immatRecherche = scanner.nextLine();
-                        gestionCourse.rechercherVoiture(immatRecherche);
-                         break;
-                    case 4:
-                        System.out.print("Entrez l'immatriculation de la voiture à modifier : ");
-                        String immatModif = scanner.nextLine();
-                        System.out.print("Entrez le nouveau modèle : ");
-                        String nouveauModele = scanner.nextLine();
-                        gestionCourse.modifierVoiture(immatModif, nouveauModele);
-                        System.out.println("-> Modification effectuée.");
-                        break;
-                       
-                    case 5:
-                         System.out.print("Entrez l'immatriculation de la voiture à supprimer : ");
-                        String immatSuppr = scanner.nextLine();
-                        gestionCourse.supprimerVoiture(immatSuppr);
-                        System.out.println("-> Voiture supprimée.");
-                        break;
-                        
-                    case 6:
-                        System.out.print("Entrez le nom ou l'identifiant de la course à configurer : ");
-                        String nomCourse = scanner.nextLine();
-                        gestionCourse.configurerCourse(nomCourse);
-                        System.out.println("-> Course configurée avec succès.");
-                        break;
-                       
-                    case 7:
-                        gestionCourse.demarrerCourse();
-                        System.out.println("-> La course a démarré !");
-                        break;
-                    case 8:
-                         System.out.println("\n--- RÉSULTATS DE LA COURSE ---");
-                            gestionCourse.consulterResultats();
-                            break;
-                    case 0:
-                        System.out.println("Fermeture de l'application...");
-                        break;
-                    default:
-                        System.out.println("Erreur : option invalide (choisissez entre 0 et 8).");
+        double distanceTotale = course.getDistanceTotale();
+        List<Participation> participants = course.getParticipants();
+
+        System.out.println("\n=======================================================");
+        System.out.printf("  DÉPART DE LA COURSE : %s (%.1f km)\n", course.getNom(), distanceTotale);
+        System.out.println("=======================================================");
+
+        int tour = 0;
+        boolean toutesArrivees = false;
+
+        // Boucle de simulation tour par tour (F3)
+        while (!toutesArrivees) {
+            tour++;
+            System.out.printf("\n--- Tour %d ---\n", tour);
+            toutesArrivees = true;
+
+            for (Participation p : participants) {
+                if (!p.isEstArrivee()) {
+                    p.avancer(distanceTotale);
                 }
-            } else {
-                System.out.println("Erreur : veuillez entrer un nombre entier valide.");
-                scanner.next(); 
-            }
-            
-            System.out.println(); 
-        } while (choix != 0);
 
-        scanner.close();
+                // Affichage de l'état de la voiture à l'issue du tour
+                String statut = p.isEstArrivee() ? " [ARRIVÉE !]" : "";
+                System.out.printf("  %-15s (%s) : %.1f / %.1f km%s\n",
+                        p.getVoiture().getNom(),
+                        p.getVoiture().getId(),
+                        p.getDistanceParcourue(),
+                        distanceTotale,
+                        statut);
+
+                if (!p.isEstArrivee()) {
+                    toutesArrivees = false;
+                }
+            }
+        }
+
+        // Clôture de la course et calcul du classement final (F4)
+        course.setEstTerminee(true);
+        course.calculerClassementSequentiel();
+
+        afficherClassement(course);
+    }
+
+    /**
+     * Affiche le classement officiel d'une course terminée.
+     *
+     * @param course La course terminée
+     */
+    public void afficherClassement(Course course) {
+        if (course == null || !course.isEstTerminee()) {
+            System.out.println("Aucun classement disponible : la course n'est pas encore terminée.");
+            return;
+        }
+        List<Participation> classement = course.getClassement();
+        if (classement.isEmpty()) {
+            System.out.println("Aucun participant dans le classement.");
+            return;
+        }
+
+        // Le nombre total de tours de la simulation correspond au max des tours effectués
+        int totalToursSimulation = 0;
+        for (Participation p : classement) {
+            if (p.getNbTours() > totalToursSimulation) {
+                totalToursSimulation = p.getNbTours();
+            }
+        }
+
+        Participation gagnant = classement.get(0);
+
+        System.out.println("\n=======================================================");
+        System.out.printf("  CLASSEMENT FINAL : %s (%.1f km)\n", course.getNom(), course.getDistanceTotale());
+        System.out.printf("  GAGNANT : [%s] %s (%s)\n",
+                gagnant.getVoiture().getId(),
+                gagnant.getVoiture().getNom(),
+                gagnant.getVoiture().getMarque());
+        System.out.printf("  Nombre total de tours de la simulation : %d tours\n", totalToursSimulation);
+        System.out.println("=======================================================");
+
+        int rang = 1;
+        for (Participation p : classement) {
+            double tempsTheorique = p.getTempsTheorique(course.getDistanceTotale());
+            System.out.printf("  %d. [%s] %-15s (%s) | Distance : %.1f km | Tours : %d | Temps théorique : %.2f tours\n",
+                    rang++,
+                    p.getVoiture().getId(),
+                    p.getVoiture().getNom(),
+                    p.getVoiture().getMarque(),
+                    p.getDistanceParcourue(),
+                    p.getNbTours(),
+                    tempsTheorique);
+        }
+        System.out.println("=======================================================\n");
     }
 }

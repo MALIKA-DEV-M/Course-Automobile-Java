@@ -51,7 +51,7 @@ public class Course {
     public boolean contientVoiture(String idVoiture) {
         if (idVoiture == null) return false;
         for (Participation p : participants) {
-            if (p.getVoiture().getId().equals(idVoiture)) {
+            if (p.getVoiture().getId().equalsIgnoreCase(idVoiture.trim())) {
                 return true;
             }
         }
@@ -68,6 +68,9 @@ public class Course {
         }
     
     public void calculerClassementSequentiel() {
+        if (!estTerminee) {
+            throw new IllegalStateException("Impossible de calculer le classement : la course n'est pas terminée.");
+        }
         classement.clear();
         classement.addAll(participants);
 

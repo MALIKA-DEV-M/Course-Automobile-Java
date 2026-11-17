@@ -1,0 +1,26 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Utilisateur" as User
+
+rectangle "Application de Simulation de Courses Automobiles" {
+  usecase "Gérer les voitures\n(Ajouter, ID, Vitesse)" as UC1
+  usecase "Configurer une course\n(Distance, Participants)" as UC2
+  usecase "Lancer la simulation" as UC3
+  usecase "Consulter le classement" as UC4
+  usecase "Valider les données\net prérequis" as UC5
+  usecase "Afficher un message\nd'erreur explicite" as UC6
+}
+
+User -- UC1
+User -- UC2
+User -- UC3
+User -- UC4
+
+UC1 ..> UC5 : <<include>>
+UC2 ..> UC5 : <<include>>
+UC3 ..> UC5 : <<include>>
+
+UC6 ..> UC5 : <<extend>>
+@enduml

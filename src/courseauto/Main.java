@@ -1,11 +1,13 @@
 package courseauto;
 
+import courseauto.concurrent.SimulateurConcurrent;
 import courseauto.modele.Course;
 import courseauto.modele.Voiture;
 import courseauto.service.GestionCourse;
 import courseauto.service.SimulateurSequentiel;
 import java.util.List;
 import java.util.Scanner;
+
 
 public class Main {
     private static final GestionCourse gestion = new GestionCourse();
@@ -18,6 +20,7 @@ public class Main {
             return;
         }
         executerModeInteractif();
+        
     }
 
     private static void executerModeAutomatique() {
@@ -60,6 +63,7 @@ public class Main {
             System.out.println("  --- Simulation & Résultats (F3 & F4) ---");
             System.out.println("  9. Lancer la simulation séquentielle");
             System.out.println("  10. Consulter les derniers résultats");
+            System.out.println("  11. Lancer la simulation concurrente");
             System.out.println("  0. Quitter");
             System.out.println("================================================");
             System.out.print("Votre choix : ");
@@ -181,6 +185,9 @@ public class Main {
                                 simulateur.afficherClassement(derniere);
                             }
                             break;
+                        case 11:
+                            executerModeConcurrent();
+                            break;
 
                         case 0:
                             System.out.println("Fermeture de l'application. À bientôt !");
@@ -199,10 +206,37 @@ public class Main {
                 }
 
             } else {
-                System.out.println("[ERREUR] Veuillez saisir un numéro entre 0 et 10.");
+                System.out.println("[ERREUR] Veuillez saisir un numéro entre 0 et 11.");
                 scanner.next(); // Vide la mauvaise saisie non entière
             }
 
         } while (choix != 0);
     }
+    private static void executerModeConcurrent(){ 
+
+        gestion.creerCourse("C1", "Course concurrente", 100);
+       
+        Voiture v5 = new Voiture("V5", "Ferrari", "Ferrari", 250);
+        Voiture v2 = new Voiture("V2", "Porsche", "Porsche", 220);
+        Voiture v3 = new Voiture("V3", "BMW", "BMW", 200);
+
+        
+        gestion.ajouterVoiture(v5);
+        gestion.ajouterVoiture(v2);
+        gestion.ajouterVoiture(v3);
+
+        
+        gestion.inscrireVoitureACourse("V5");
+        gestion.inscrireVoitureACourse("V2");
+        gestion.inscrireVoitureACourse("V3");
+
+    
+
+
+
+       SimulateurConcurrent simulateurconcu = new SimulateurConcurrent();
+
+       simulateurconcu.lancer(gestion.getCourseActuelle());
+    }   
+  
 }
